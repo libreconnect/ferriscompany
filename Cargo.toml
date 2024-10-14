@@ -1,0 +1,14 @@
+[package]
+name = "ferriscompany"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ferriscompany_server"
+path = "src/bin/server/main.rs"
+
+[lib]
+name = "ferriscompany"
+path = "src/lib/lib.rs"
+
+[dependencies]
