@@ -12,5 +12,6 @@ name = "ferriscompany"
 path = "src/lib/lib.rs"
 
 [dependencies]
+neo4rs = "0.8.0"
 thiserror = "1.0.64"
-uuid = "1.10.0"
+uuid = { version = "1.10.0", features = ["v4"] }

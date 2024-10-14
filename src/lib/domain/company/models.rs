@@ -15,7 +15,14 @@ impl Company {
 }
 
 #[derive(Debug, Clone, Error)]
-pub enum CompanyError {}
+pub enum CompanyError {
+    #[error("Company not found")]
+    NotFound,
+    #[error("Company delete error")]
+    DeleteError,
+    #[error("Company create error: {0}")]
+    CreateError(String),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Name(String);
