@@ -1,4 +1,4 @@
-w<p align="center">
+<p align="center">
   <a href="https://github.com/libreconnect/ferriscompany">
     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Original_Ferris.svg/2560px-Original_Ferris.svg.png" width="200px" alt="Ferris Company logo" />
   </a>
