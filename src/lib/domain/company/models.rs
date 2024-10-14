@@ -6,6 +6,17 @@ pub struct Company {
   pub name: Name,
 }
 
+impl Company {
+  pub fn new(id: uuid::Uuid, name: Name) -> Company {
+    Company { id, name }
+  }
+}
+
+#[derive(Debug, Clone, Error)]
+pub enum CompanyError {
+
+}
+
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Name(String);
