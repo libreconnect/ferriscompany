@@ -1,5 +1,5 @@
 use super::{
-    models::{Company, CompanyError},
+    models::{company_validator::CreateCompany, Company, CompanyError},
     ports::{CompanyRepository, CompanyService},
 };
 
@@ -24,8 +24,8 @@ impl<C> CompanyService for CompanyServiceImpl<C>
 where
     C: CompanyRepository,
 {
-    async fn create(&self, name: &str) -> Result<Company, CompanyError> {
-        let company = Company::new(name);
+    async fn create(&self, payload: CreateCompany) -> Result<Company, CompanyError> {
+        let company = Company::new_from(payload)?;
         self.company_repository.save(&company).await?;
 
         Ok(company)

@@ -1,6 +1,6 @@
 use std::future::Future;
 
-use super::models::{Company, CompanyError};
+use super::models::{company_validator::CreateCompany, Company, CompanyError};
 
 pub trait CompanyRepository: Clone + Send + Sync + 'static {
     fn find_by_id(
@@ -13,5 +13,5 @@ pub trait CompanyRepository: Clone + Send + Sync + 'static {
 }
 
 pub trait CompanyService: Clone + Send + Sync + 'static {
-    fn create(&self, name: &str) -> impl Future<Output = Result<Company, CompanyError>> + Send;
+    fn create(&self, payload: CreateCompany) -> impl Future<Output = Result<Company, CompanyError>> + Send;
 }

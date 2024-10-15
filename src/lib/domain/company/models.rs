@@ -1,16 +1,62 @@
+use company_validator::CreateCompany;
 use thiserror::Error;
+
+pub mod company_validator;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Company {
     pub id: uuid::Uuid,
     pub name: Name,
+    pub city: String,
+    pub country: String,
+    pub email: String,
+    pub phone: String,
+    pub zip_code: String,
+    pub address: String,
+    pub national_code: String,
 }
 
 impl Company {
-    pub fn new(value: &str) -> Company {
+    pub fn new(
+        name: &str,
+        city: String,
+        country: String,
+        email: String,
+        phone: String,
+        zip_code: String,
+        address: String,
+        national_code: String,
+    ) -> Company {
         let id = uuid::Uuid::new_v4();
-        let name = Name::new(value).unwrap();
-        Company { id, name }
+        let name = Name::new(name).unwrap();
+        Company {
+            id,
+            name,
+            city,
+            country,
+            email,
+            phone,
+            zip_code,
+            address,
+            national_code,
+        }
+    }
+
+    pub fn new_from(input: CreateCompany) -> Result<Company, CompanyError> {
+      let id = uuid::Uuid::new_v4();
+      let name = Name::new(&input.name).map_err(|_| CompanyError::CreateError("Name cannot be empty".to_string()))?;
+
+      Ok(Company {
+        id,
+        name,
+        city: input.city,
+        country: input.country,
+        email: input.email,
+        phone: input.phone,
+        zip_code: input.zip_code,
+        address: input.address,
+        national_code: input.national_code,
+      })
     }
 }
 

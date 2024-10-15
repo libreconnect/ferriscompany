@@ -36,12 +36,19 @@ impl CompanyRepository for Neo4jCompanyRepository {
     async fn save(&self, company: &Company) -> Result<(), CompanyError> {
         let query = query(
             "
-            CREATE (c:Company {id: $id, name: $name})
+            CREATE (c:Company {id: $id, name: $name, city: $city, country: $country, email: $email, phone: $phone, zip_code: $zip_code, address: $address, national_code: $national_code})
             RETURN c
         ",
         )
         .param("id", company.id.to_string())
-        .param("name", company.name.as_str());
+        .param("name", company.name.as_str())
+        .param("city", company.city.as_str())
+        .param("country", company.country.as_str())
+        .param("email", company.email.as_str())
+        .param("phone", company.phone.as_str())
+        .param("zip_code", company.zip_code.as_str())
+        .param("address", company.address.as_str())
+        .param("national_code", company.national_code.as_str());
 
         self.neo4j
             .get_graph()
