@@ -1,9 +1,10 @@
 use company_validator::CreateCompany;
+use serde::Deserialize;
 use thiserror::Error;
 
 pub mod company_validator;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub struct Company {
     pub id: uuid::Uuid,
     pub name: Name,
@@ -43,20 +44,21 @@ impl Company {
     }
 
     pub fn new_from(input: CreateCompany) -> Result<Company, CompanyError> {
-      let id = uuid::Uuid::new_v4();
-      let name = Name::new(&input.name).map_err(|_| CompanyError::CreateError("Name cannot be empty".to_string()))?;
+        let id = uuid::Uuid::new_v4();
+        let name = Name::new(&input.name)
+            .map_err(|_| CompanyError::CreateError("Name cannot be empty".to_string()))?;
 
-      Ok(Company {
-        id,
-        name,
-        city: input.city,
-        country: input.country,
-        email: input.email,
-        phone: input.phone,
-        zip_code: input.zip_code,
-        address: input.address,
-        national_code: input.national_code,
-      })
+        Ok(Company {
+            id,
+            name,
+            city: input.city,
+            country: input.country,
+            email: input.email,
+            phone: input.phone,
+            zip_code: input.zip_code,
+            address: input.address,
+            national_code: input.national_code,
+        })
     }
 }
 
@@ -68,9 +70,11 @@ pub enum CompanyError {
     DeleteError,
     #[error("Company create error: {0}")]
     CreateError(String),
+    #[error("Company unknown error: {0}")]
+    Unkown(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub struct Name(String);
 
 #[derive(Clone, Debug, Error)]
