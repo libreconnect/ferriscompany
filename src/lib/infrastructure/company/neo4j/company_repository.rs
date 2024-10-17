@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use neo4rs::{query, Query};
+use neo4rs::query;
 
 use crate::{
     domain::company::{
@@ -52,7 +52,7 @@ impl CompanyRepository for Neo4jCompanyRepository {
 
         self.neo4j
             .get_graph()
-            .execute(query)
+            .run(query)
             .await
             .map_err(|e| CompanyError::CreateError(e.to_string()))
             .map(|_| ())
@@ -62,7 +62,25 @@ impl CompanyRepository for Neo4jCompanyRepository {
         todo!()
     }
 
-    async fn find_by_id(&self, _id: uuid::Uuid) -> Result<Option<Company>, CompanyError> {
-        todo!()
+    async fn find_by_id(&self, id: String) -> Result<Option<Company>, CompanyError> {
+        let query = query("MATCH (c:Company {id: $id}) RETURN c LIMIT 1").param("id", id);
+
+        let mut result = self
+            .neo4j
+            .get_graph()
+            .execute(query)
+            .await
+            .map_err(|_| CompanyError::NotFound)?;
+
+        if let Ok(Some(row)) = result.next().await {
+            let company: Company = row
+                .get("c")
+                .map_err(|e| CompanyError::Unkown(e.to_string()))?;
+            println!("company: {:?}", company);
+
+            return Ok(Some(company));
+        }
+
+        Ok(None)
     }
 }
