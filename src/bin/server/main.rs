@@ -29,7 +29,6 @@ async fn main() -> anyhow::Result<()> {
 
     let messaging = Arc::new(NatsMessaging::new(&env.nats_url).await?);
 
-    let _nats = Arc::new(Nats::new(&env.nats_url).await?);
 
     let server_config = HttpServerConfig::new(env.port.clone());
 
