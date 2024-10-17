@@ -11,8 +11,14 @@ pub mod handlers;
 pub mod responses;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct HttpServerConfig<'a> {
-    pub port: &'a str,
+pub struct HttpServerConfig {
+    pub port: String,
+}
+
+impl HttpServerConfig {
+    pub fn new(port: String) -> Self {
+        Self { port }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -29,8 +35,8 @@ pub struct HttpServer {
 }
 
 impl HttpServer {
-    pub async fn new<'a, C>(
-        config: HttpServerConfig<'a>,
+    pub async fn new<C>(
+        config: HttpServerConfig,
         company_service: Arc<C>,
     ) -> anyhow::Result<Self>
     where

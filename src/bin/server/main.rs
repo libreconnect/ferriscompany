@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
+use clap::Parser;
 use ferriscompany::{
     application::http::{HttpServer, HttpServerConfig},
     domain::company::services::CompanyServiceImpl,
+    env::Env,
     infrastructure::{
         company::neo4j::company_repository::Neo4jCompanyRepository, db::neo4j::Neo4j,
     },
@@ -13,10 +15,17 @@ async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     tracing_subscriber::fmt::init();
 
-    let database = Neo4j::new("0.0.0.0:7687", "neo4j", "password").await;
+    let env = Arc::new(Env::parse());
+
+    let database = Neo4j::new(
+        &env.database_url,
+        &env.database_user,
+        &env.database_password,
+    )
+    .await;
     let neo4j = Arc::new(database);
 
-    let server_config = HttpServerConfig { port: "3333" };
+    let server_config = HttpServerConfig::new(env.port.clone());
 
     let company_repository = Neo4jCompanyRepository::new(Arc::clone(&neo4j));
     let company_service = CompanyServiceImpl::new(company_repository);
