@@ -1,4 +1,8 @@
+use std::sync::Arc;
+
 use tracing::info;
+
+use crate::application::ports::messaging_ports::MessagingPort;
 
 use super::{
     models::{
@@ -9,25 +13,32 @@ use super::{
 };
 
 #[derive(Debug, Clone)]
-pub struct CompanyServiceImpl<C>
+pub struct CompanyServiceImpl<C, M>
 where
     C: CompanyRepository,
+    M: MessagingPort,
 {
     company_repository: C,
+    messaging: Arc<M>,
 }
 
-impl<C> CompanyServiceImpl<C>
+impl<C, M> CompanyServiceImpl<C, M>
 where
     C: CompanyRepository,
+    M: MessagingPort,
 {
-    pub fn new(company_repository: C) -> CompanyServiceImpl<C> {
-        CompanyServiceImpl { company_repository }
+    pub fn new(company_repository: C, messaging: Arc<M>) -> CompanyServiceImpl<C, M> {
+        CompanyServiceImpl {
+            company_repository,
+            messaging,
+        }
     }
 }
 
-impl<C> CompanyService for CompanyServiceImpl<C>
+impl<C, M> CompanyService for CompanyServiceImpl<C, M>
 where
     C: CompanyRepository,
+    M: MessagingPort,
 {
     async fn create(&self, payload: CreateCompany) -> Result<Company, CompanyError> {
         let company = Company::new_from(payload)?;
@@ -49,7 +60,17 @@ where
         professional_data: AttachProfessionalInCompany,
     ) -> Result<(), CompanyError> {
         info!("Adding professional to company: {:?}", professional_data);
+        let message = format!(
+            "{{\"professional_id\": \"{}\", \"company_id\": \"{}\"}}",
+            professional_data.professional_id, &company_id
+        );
         self.company_repository.find_by_id(company_id).await?;
+
+        self.messaging
+            .publish_message(String::from("company.professional.add.requested"), message)
+            .await
+            .map_err(|e| CompanyError::Unkown(e.to_string()))?;
+
         Ok(())
     }
 }
