@@ -6,7 +6,7 @@ use ferriscompany::{
     domain::company::services::CompanyServiceImpl,
     env::Env,
     infrastructure::{
-        company::neo4j::company_repository::Neo4jCompanyRepository, db::neo4j::Neo4j,
+        company::neo4j::company_repository::Neo4jCompanyRepository, db::neo4j::Neo4j, messaging::nats::Nats,
     },
 };
 
@@ -24,6 +24,8 @@ async fn main() -> anyhow::Result<()> {
     )
     .await;
     let neo4j = Arc::new(database);
+
+    let _nats = Arc::new(Nats::new(&env.nats_url).await?);
 
     let server_config = HttpServerConfig::new(env.port.clone());
 

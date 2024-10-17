@@ -29,9 +29,7 @@ pub struct CompanyInfo {
 }
 
 impl Company {
-    pub fn new(
-        info: CompanyInfo,
-    ) -> Company {
+    pub fn new(info: CompanyInfo) -> Company {
         let id = uuid::Uuid::new_v4();
         let name = Name::new(&info.name).unwrap();
         Company {
