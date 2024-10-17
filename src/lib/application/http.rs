@@ -35,10 +35,7 @@ pub struct HttpServer {
 }
 
 impl HttpServer {
-    pub async fn new<C>(
-        config: HttpServerConfig,
-        company_service: Arc<C>,
-    ) -> anyhow::Result<Self>
+    pub async fn new<C>(config: HttpServerConfig, company_service: Arc<C>) -> anyhow::Result<Self>
     where
         C: CompanyService,
     {
