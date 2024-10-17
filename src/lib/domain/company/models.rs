@@ -17,29 +17,33 @@ pub struct Company {
     pub national_code: String,
 }
 
+pub struct CompanyInfo {
+    pub name: String,
+    pub city: String,
+    pub country: String,
+    pub email: String,
+    pub phone: String,
+    pub zip_code: String,
+    pub address: String,
+    pub national_code: String,
+}
+
 impl Company {
     pub fn new(
-        name: &str,
-        city: String,
-        country: String,
-        email: String,
-        phone: String,
-        zip_code: String,
-        address: String,
-        national_code: String,
+        info: CompanyInfo,
     ) -> Company {
         let id = uuid::Uuid::new_v4();
-        let name = Name::new(name).unwrap();
+        let name = Name::new(&info.name).unwrap();
         Company {
             id,
             name,
-            city,
-            country,
-            email,
-            phone,
-            zip_code,
-            address,
-            national_code,
+            city: info.city,
+            country: info.country,
+            email: info.email,
+            phone: info.phone,
+            zip_code: info.zip_code,
+            address: info.address,
+            national_code: info.national_code,
         }
     }
 

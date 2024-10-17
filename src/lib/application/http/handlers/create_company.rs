@@ -48,7 +48,7 @@ impl From<CompanyError> for ApiError {
             CompanyError::NotFound => Self::InternalServerError("company not found".to_string()),
             CompanyError::DeleteError => {
                 Self::InternalServerError("company delete error".to_string())
-            },
+            }
             CompanyError::Unkown(e) => Self::InternalServerError(e.to_string()),
         }
     }
