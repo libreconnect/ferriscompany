@@ -73,4 +73,17 @@ where
 
         Ok(())
     }
+
+    async fn handle_professional_validated(
+        &self,
+        message: super::models::message::MessageProfessionalValidated,
+    ) -> Result<(), CompanyError> {
+        info!("Handling professional validated: {:?}", message);
+
+        self.company_repository
+            .add_professional_to_company(message.company_id, message.professional_id)
+            .await?;
+
+        Ok(())
+    }
 }
