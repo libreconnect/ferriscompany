@@ -3,6 +3,7 @@ use serde::Deserialize;
 use thiserror::Error;
 
 pub mod company_validator;
+pub mod message;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 pub struct Company {
