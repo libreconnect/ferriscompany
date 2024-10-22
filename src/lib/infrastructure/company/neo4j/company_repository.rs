@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use futures::TryFutureExt;
 use neo4rs::query;
 
 use crate::{
@@ -82,5 +83,28 @@ impl CompanyRepository for Neo4jCompanyRepository {
         }
 
         Ok(None)
+    }
+
+    async fn add_professional_to_company(
+        &self,
+        company_id: String,
+        professional_id: String,
+    ) -> Result<(), CompanyError> {
+        let query = query(
+            "
+            MATCH (c:Company {id: $company_id})
+            MATCH (p:Professional {id: $professional_id})
+            CREATE (p)-[:WORKS_IN]->(c)",
+        )
+        .param("company_id", company_id)
+        .param("professional_id", professional_id);
+
+        self.neo4j
+            .get_graph()
+            .run(query)
+            .map_err(|e| CompanyError::Unkown(e.to_string()))
+            .await?;
+
+        Ok(())
     }
 }
