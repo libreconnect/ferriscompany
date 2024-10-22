@@ -1,7 +1,11 @@
 use async_nats::{connect, Client};
-use std::sync::Arc;
+use futures::StreamExt;
+use serde::de::DeserializeOwned;
+use std::{fmt::Debug, future::Future, sync::Arc};
 
-use crate::application::ports::messaging_ports::MessagingPort;
+use crate::application::ports::{
+    messaging_ports::MessagingPort, messaging_subscriber_port::MessagingSubscriberPort,
+};
 
 pub struct Nats {
     client: Arc<Client>,
@@ -48,5 +52,34 @@ impl MessagingPort for NatsMessaging {
             .await
             .map_err(|e| anyhow::anyhow!(e.to_string()))
             .map(|_| ())
+    }
+}
+
+impl MessagingSubscriberPort for NatsMessaging {
+    async fn subscribe<F, T, Fut>(&self, topic: &str, handler: F) -> anyhow::Result<()>
+    where
+        F: Fn(T) -> Fut + Send + Sync + 'static,
+        Fut: Future<Output = anyhow::Result<()>> + Send,
+        T: DeserializeOwned + Send + Sync + Debug + 'static,
+    {
+        let conn = self.get_connection();
+
+        let t = String::from(topic);
+
+        let mut subscriber = conn
+            .subscribe(t)
+            .await
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
+
+        while let Some(message) = subscriber.next().await {
+            let message_str = String::from_utf8_lossy(&message.payload).to_string();
+
+            let parsed_message: T = serde_json::from_str(&message_str)
+                .map_err(|e| anyhow::anyhow!("Failed to deserialize message: {:?}", e))?;
+
+            handler(parsed_message).await?;
+        }
+
+        Ok(())
     }
 }
