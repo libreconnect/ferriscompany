@@ -17,7 +17,7 @@ use ferriscompany::{
     infrastructure::{
         company::neo4j::company_repository::Neo4jCompanyRepository,
         db::neo4j::Neo4j,
-        messaging::nats::{Nats, NatsMessaging},
+        messaging::nats::NatsMessaging,
     },
 };
 
