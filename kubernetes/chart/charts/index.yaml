@@ -1,0 +1,16 @@
+apiVersion: v1
+entries:
+  ferriscompany:
+  - apiVersion: v2
+    appVersion: 0.1.0-rc6
+    created: "2024-11-03T19:59:57.870136+01:00"
+    description: A Helm chart for Kubernetes
+    digest: 80aa6b6a0129a5b80d3b41345d4aa69658ba8de5aa405000b4992e02ce84d846
+    name: ferriscompany
+    sources:
+    - https://github.com/libreconnect/ferriscompany/tree/main/kubernetes/chart
+    type: application
+    urls:
+    - ferriscompany-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-11-03T19:59:57.869389+01:00"
