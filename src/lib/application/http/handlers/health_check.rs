@@ -5,3 +5,7 @@ use super::{ApiError, ApiSuccess};
 pub async fn live_check() -> Result<impl IntoResponse, ApiError> {
     Ok(ApiSuccess::new(StatusCode::OK, "OK"))
 }
+
+pub async fn ready_check() -> Result<impl IntoResponse, ApiError> {
+    Ok(ApiSuccess::new(StatusCode::OK, "OK"))
+}

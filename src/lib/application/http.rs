@@ -55,6 +55,7 @@ impl HttpServer {
 
         let router = axum::Router::new()
             .route("/health/live", get(health_check::live_check))
+            .route("/health/ready", get(health_check::ready_check))
             .nest("/v1", api_routes())
             .layer(trace_layer)
             .layer(Extension(Arc::clone(&state.company_service)))
