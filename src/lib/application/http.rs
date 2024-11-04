@@ -2,8 +2,13 @@ use std::sync::Arc;
 
 use crate::domain::company::ports::CompanyService;
 use anyhow::Context;
-use axum::{routing::post, Extension};
-use handlers::{attach_professional::attach_professional, create_company::create_company};
+use axum::{
+    routing::{get, post},
+    Extension,
+};
+use handlers::{
+    attach_professional::attach_professional, create_company::create_company, health_check,
+};
 use tokio::net;
 use tracing::{info, info_span};
 
@@ -49,6 +54,7 @@ impl HttpServer {
         let state = AppState { company_service };
 
         let router = axum::Router::new()
+            .route("/health/live", get(health_check::live_check))
             .nest("/v1", api_routes())
             .layer(trace_layer)
             .layer(Extension(Arc::clone(&state.company_service)))
