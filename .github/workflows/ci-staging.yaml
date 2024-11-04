@@ -10,6 +10,14 @@ permissions:
   packages: write
 
 jobs:
+  extract-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract_version.outputs.VERSION }}
+    steps:
+      - name: Extract version
+        id: extract_version
+        run: echo "VERSION=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_OUTPUT
   fmt:
     runs-on: ubuntu-latest
     steps:
@@ -66,58 +74,13 @@ jobs:
       # Step 4: Run `cargo clippy` for linting
       - name: Run cargo clippy
         run: cargo clippy -- --D warnings
-
-  # build:
-  #   runs-on: ubuntu-latest
-  #   needs: [fmt, clippy]
-  #   steps:
-  #     # Step 1: Checkout code
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
-
-  #     # Step 2: Cache Rust dependencies
-  #     - name: Cache cargo registry
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: |
-  #           ~/.cargo/registry
-  #           ~/.cargo/git
-  #         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-cargo-registry-
-
-  #     - name: Cache cargo build
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: target
-  #         key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-cargo-build-
-
-  #     # Step 3: Set up Rust
-  #     - name: Set up Rust
-  #       uses: actions-rs/toolchain@v1
-  #       with:
-  #         toolchain: stable
-  #         override: true
-
-  #     # Step 4: Build the project
-  #     - name: Build the project
-  #       run: cargo build --release
-
-  #     # Step 5: Run tests
-  #     - name: Run tests
-  #       run: cargo test
   build-and-push:
-    needs: [fmt, clippy]
+    needs: [fmt, clippy, extract-version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Extract version
-        id: extract_version
-        run: echo "VERSION=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_OUTPUT
       - name: Echo info
         run: |
           echo ${{ github.actor }}
@@ -136,4 +99,30 @@ jobs:
           context: .
           push: true
           provenance: false
-          tags: ghcr.io/libreconnect/ferriscompany:${{ steps.extract_version.outputs.VERSION }}
+          tags: ghcr.io/libreconnect/ferriscompany:${{ needs.extract-version.outputs.version }}
+  update-yaml:
+    needs: [build-and-push, extract-version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: 'libreconnect/infrastructure'
+          ref: 'main'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update deployment.yaml
+        env:
+          VERSION: ${{ needs.extract-version.outputs.version }} 
+        run: |
+          echo "Version staging qui sera déployée: $VERSION"
+          yq -ie ".ferriscompany.image.tag = \"$VERSION\"" applications/ferriscompany/chart/environments/dev/values.yaml
+      - name: Commit changes          
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add applications/ferriscompany/chart/environments/dev/values.yaml
+          git commit -m "Update staging values.yml to $VERSION"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.extract-version.outputs.version }} 
