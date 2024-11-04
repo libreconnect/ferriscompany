@@ -5,7 +5,9 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
 
-permissions: write-all
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   extract-version:
@@ -107,7 +109,7 @@ jobs:
         with:
           repository: 'libreconnect/infrastructure'
           ref: 'main'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT }}
       - name: Update deployment.yaml
         env:
           VERSION: ${{ needs.extract-version.outputs.version }} 
@@ -122,5 +124,5 @@ jobs:
           git commit -m "Update staging values.yml to $VERSION"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
           VERSION: ${{ needs.extract-version.outputs.version }} 
