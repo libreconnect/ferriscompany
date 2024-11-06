@@ -18,64 +18,15 @@ jobs:
       - name: Extract version
         id: extract_version
         run: echo "VERSION=$(echo $GITHUB_REF | sed -n 's/refs\/tags\/v//p')" >> $GITHUB_OUTPUT
-  fmt:
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Step 2: Cache Rust dependencies
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-
-      # Step 3: Set up Rust
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      # Step 4: Run `cargo fmt` to check formatting
-      - name: Run cargo fmt
-        run: cargo fmt -- --check
-  clippy:
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout code
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Step 2: Cache Rust dependencies
-      - name: Cache cargo registry
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-registry-
-
-      # Step 3: Set up Rust
-      - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      # Step 4: Run `cargo clippy` for linting
-      - name: Run cargo clippy
-        run: cargo clippy -- --D warnings
+  check-service:
+    uses: libreconnect/infrastructure/.github/workflows/check-service.yaml@main
+    with:
+      repository: libreconnect/ferriscompany
+      ref: main
+    secrets:
+      PAT: ${{ secrets.GITHUB_TOKEN }}
   build-and-push:
-    needs: [fmt, clippy, extract-version]
+    needs: [check-service, extract-version]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
