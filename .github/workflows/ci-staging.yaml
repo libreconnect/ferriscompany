@@ -36,58 +36,40 @@ jobs:
       registry_username: ${{ github.actor }}
     secrets:
       PAT: ${{ secrets.GITHUB_TOKEN }}
+  deploy-staging:
+    needs: [build-and-push, extract-version]
+    uses: libreconnect/infrastructure/.github/workflows/application-version-update.yaml@main
+    with:
+      environment: staging
+      key: .ferriscompany.image.tag
+      path: applications/ferriscompany/chart/environments/staging/values.yaml
+      ref: main
+      repository: libreconnect/ferriscompany
+      version: ${{ needs.extract-version.outputs.version }}
 
-
-
-  # build-and-push:
-  #   needs: [check-service, extract-version]
+  # update-yaml:
+  #   needs: [build-and-push, extract-version]
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
+  #     - name: Checkout target repository
+  #       uses: actions/checkout@v4
   #       with:
-  #         fetch-depth: 0
-  #     - name: Echo info
+  #         repository: 'libreconnect/infrastructure'
+  #         ref: 'main'
+  #         token: ${{ secrets.PAT }}
+  #     - name: Update deployment.yaml
+  #       env:
+  #         VERSION: ${{ needs.extract-version.outputs.version }} 
   #       run: |
-  #         echo ${{ github.actor }}
-  #         echo ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Login to GitHub Container Registry
-  #       uses: docker/login-action@v3
-  #       with:
-  #         registry: ghcr.io
-  #         username: ${{ github.actor }}
-  #         password: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Setup Buildx
-  #       uses: docker/setup-buildx-action@v3
-  #     - name: Build and Push
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         push: true
-  #         provenance: false
-  #         tags: ghcr.io/libreconnect/ferriscompany:${{ needs.extract-version.outputs.version }}
-  update-yaml:
-    needs: [build-and-push, extract-version]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout target repository
-        uses: actions/checkout@v4
-        with:
-          repository: 'libreconnect/infrastructure'
-          ref: 'main'
-          token: ${{ secrets.PAT }}
-      - name: Update deployment.yaml
-        env:
-          VERSION: ${{ needs.extract-version.outputs.version }} 
-        run: |
-          echo "Version staging qui sera déployée: $VERSION"
-          yq -ie ".ferriscompany.image.tag = \"$VERSION\"" applications/ferriscompany/chart/environments/dev/values.yaml
-      - name: Commit changes          
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add applications/ferriscompany/chart/environments/dev/values.yaml
-          git commit -m "Update staging values.yml to $VERSION"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-          VERSION: ${{ needs.extract-version.outputs.version }} 
+  #         echo "Version staging qui sera déployée: $VERSION"
+  #         yq -ie ".ferriscompany.image.tag = \"$VERSION\"" applications/ferriscompany/chart/environments/dev/values.yaml
+  #     - name: Commit changes          
+  #       run: |
+  #         git config user.name "GitHub Actions"
+  #         git config user.email "github-actions[bot]@users.noreply.github.com"
+  #         git add applications/ferriscompany/chart/environments/dev/values.yaml
+  #         git commit -m "Update staging values.yml to $VERSION"
+  #         git push
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.PAT }}
+  #         VERSION: ${{ needs.extract-version.outputs.version }} 
