@@ -46,7 +46,8 @@ jobs:
       ref: main
       repository: libreconnect/ferriscompany
       version: ${{ needs.extract-version.outputs.version }}
-
+    secrets:
+      PAT: ${{ secrets.PAT }}
   # update-yaml:
   #   needs: [build-and-push, extract-version]
   #   runs-on: ubuntu-latest
