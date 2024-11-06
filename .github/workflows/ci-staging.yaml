@@ -27,30 +27,44 @@ jobs:
       PAT: ${{ secrets.GITHUB_TOKEN }}
   build-and-push:
     needs: [check-service, extract-version]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Echo info
-        run: |
-          echo ${{ github.actor }}
-          echo ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Setup Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          provenance: false
-          tags: ghcr.io/libreconnect/ferriscompany:${{ needs.extract-version.outputs.version }}
+    uses: libreconnect/infrastructure/.github/workflows/build-and-push.yaml@main
+    with:
+      registry: ghcr.io
+      repository: libreconnect/ferriscompany
+      ref: main
+      tag: ${{ needs.extract-version.outputs.version }}
+      registry_username: ${{ github.actor }}
+    secrets:
+      PAT: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+  # build-and-push:
+  #   needs: [check-service, extract-version]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Echo info
+  #       run: |
+  #         echo ${{ github.actor }}
+  #         echo ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v3
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Setup Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Build and Push
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         push: true
+  #         provenance: false
+  #         tags: ghcr.io/libreconnect/ferriscompany:${{ needs.extract-version.outputs.version }}
   update-yaml:
     needs: [build-and-push, extract-version]
     runs-on: ubuntu-latest
