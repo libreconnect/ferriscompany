@@ -30,6 +30,7 @@ pub trait CompanyService: Clone + Send + Sync + 'static {
         &self,
         id: String,
     ) -> impl Future<Output = Result<Option<Company>, CompanyError>> + Send;
+    fn find_all(&self) -> impl Future<Output = Result<Vec<Company>, CompanyError>> + Send;
     fn add_professional_to_company(
         &self,
         company_id: String,

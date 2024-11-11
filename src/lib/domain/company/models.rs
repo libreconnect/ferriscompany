@@ -1,11 +1,11 @@
 use company_validator::CreateCompany;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub mod company_validator;
 pub mod message;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct Company {
     pub id: uuid::Uuid,
     pub name: Name,
@@ -77,7 +77,7 @@ pub enum CompanyError {
     Unkown(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct Name(String);
 
 #[derive(Clone, Debug, Error)]
