@@ -54,6 +54,10 @@ where
         Ok(company)
     }
 
+    async fn find_all(&self) -> Result<Vec<Company>, CompanyError> {
+        self.company_repository.find_all().await
+    }
+
     async fn add_professional_to_company(
         &self,
         company_id: String,

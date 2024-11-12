@@ -60,7 +60,24 @@ impl CompanyRepository for Neo4jCompanyRepository {
     }
 
     async fn find_all(&self) -> Result<Vec<Company>, CompanyError> {
-        todo!()
+        let query = query("MATCH (c:Company) RETURN c");
+
+        let mut result = self
+            .neo4j
+            .get_graph()
+            .execute(query)
+            .await
+            .map_err(|_| CompanyError::NotFound)?;
+
+        let mut companies = Vec::new();
+        while let Ok(Some(row)) = result.next().await {
+            let company: Company = row
+                .get("c")
+                .map_err(|e| CompanyError::Unkown(e.to_string()))?;
+            companies.push(company);
+        }
+
+        Ok(companies)
     }
 
     async fn find_by_id(&self, id: String) -> Result<Option<Company>, CompanyError> {

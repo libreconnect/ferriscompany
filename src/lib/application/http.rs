@@ -7,7 +7,8 @@ use axum::{
     Extension,
 };
 use handlers::{
-    attach_professional::attach_professional, create_company::create_company, health_check,
+    attach_professional::attach_professional, create_company::create_company,
+    get_companies::get_companies, get_company::get_company, health_check,
 };
 use tokio::net;
 use tracing::{info, info_span};
@@ -87,7 +88,9 @@ where
     C: CompanyService + Send + Sync + 'static,
 {
     axum::Router::new()
+        .route("/companies", get(get_companies::<C>))
         .route("/companies", post(create_company::<C>))
+        .route("/companies/:company_id", get(get_company::<C>))
         .route(
             "/companies/:company_id/professionals",
             post(attach_professional::<C>),
