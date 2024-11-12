@@ -1,0 +1,44 @@
+name: Deploy or Update Chart on Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build-and-push:
+    uses: libreconnect/infrastructure/.github/workflows/build-and-push.yaml@main
+    with:
+      registry: ghcr.io
+      repository: libreconnect/ferriscompany
+      ref: main
+      tag: ${{ github.sha }}-${{ github.event.pull_request.number }}
+      registry_username: ${{ github.actor }}
+  deploy-chart:
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ !github.event.act }}
+        with:
+          repository: 'libreconnect/infrastructure'
+          ref: 'main'
+          token: ${{ secrets.PAT }}
+      - name: deploy
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBECONFIG }}
+        with: 
+          args: |
+            helm upgrade --install --namespace ephemeral-libreconnect apps helm/charts/apps
+            helm upgrade --install apps-pr-${{ env.PR_NUMBER }} helm/charts/apps \
+              --namespace ephemeral-libreconnect \
+              --create-namespace \
+              --set ferriscompany.image.tag=${{ github.sha }}-${{ github.event.pull_request.number }}
+      # - name: Deploy
+      #   uses: WyriHaximus/github-action-helm3@v3
+      #   with:
+      #     exec: helm upgrade apps ./helm/charts/apps --install --namespace=ephemeral-libreconnect
+      #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
+      #     overrule_existing_kubeconfig: "true"
