@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: write
+  packages: write
+  
 jobs:
   build-and-push:
     uses: libreconnect/infrastructure/.github/workflows/build-and-push.yaml@main
